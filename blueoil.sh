@@ -73,10 +73,10 @@ function get_yaml_param(){
 NAME=$0 # Name of the script
 BASE_DIR=$(dirname $0)
 ABS_BASE_DIR=$(get_abs_path ${BASE_DIR})
+
 # Docker image of blueoil
-IMAGE_NAME=blueoil_$(id -un)
-BUILD_VERSION=$(git describe --tags --always --dirty --match="v*" 2> /dev/null || cat $(CURDIR/.version 2> /dev/null || echo v0))
-DOCKER_IMAGE=$IMAGE_NAME:$BUILD_VERSION
+DOCKER_IMAGE=$(id -un)_blueoil:local_build
+
 # Argument of path for docker needs to be absolute path.
 GUEST_HOME_DIR="/home/blueoil"
 GUEST_CONFIG_DIR="${GUEST_HOME_DIR}/config"
@@ -88,6 +88,16 @@ GROUP_ID=$(id -g)
 # Shared docker options
 PYHONPATHS="-e PYTHONPATH=/home/blueoil:/home/blueoil/lmnet:/home/blueoil/dlk/python/dlk"
 SHARED_DOCKER_OPTIONS="--rm -t -u ${USER_ID}:${GROUP_ID} ${PYHONPATHS}"
+
+# Mount source code directories if they are exist on host.
+# Docker's -v option overwrite container's directory with mounted host directory.
+# Currently, we do not mount dlk, because dlk directory include pre compiled library
+if [ -e lmnet ] && [ -e blueoil ] ; then
+	touch lmnet/lmnet/__init__.py
+	SHARED_DOCKER_OPTIONS=${SHARED_DOCKER_OPTIONS}" \
+		-v ${ABS_BASE_DIR}/lmnet:${GUEST_HOME_DIR}/lmnet \
+		-v ${ABS_BASE_DIR}/blueoil:${GUEST_HOME_DIR}/blueoil"
+fi
 
 function blueoil_init(){
 	CONFIG_DIR=${ABS_BASE_DIR}/config

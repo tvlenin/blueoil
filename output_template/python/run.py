@@ -102,8 +102,11 @@ def _run(model, input_image, config):
         nn.init()
 
     # run the graph
-    output = nn.run(data)
-
+    import time
+    ts = time.time()
+    for i in range (0,100):
+        output = nn.run(data)
+    print("total time :", (time.time()-ts)/100 )
     return output, raw_image
 
 

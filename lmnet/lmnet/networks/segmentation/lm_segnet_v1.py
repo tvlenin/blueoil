@@ -62,31 +62,95 @@ class LmSegnetV1(Base):
         if self.data_format != 'NHWC':
             output = tf.transpose(output, perm=['NHWC'.find(d) for d in self.data_format])
         return output
+    def fire_module(self,is_training,inputs,squeeze_depth,expand_depth,reuse=tf.AUTO_REUSE,scope=None):
+        with tf.variable_scope(scope, 'fire', [inputs], reuse=reuse):
+            channels_data_format = 'channels_last' if self.data_format == 'NHWC' else 'channels_first'
+            
+            if self.data_format == "NHWC":
+                concat_axis = -1
+            if self.data_format == "NCHW":
+                concat_axis = 1
+            lmnet_block = self._get_lmnet_block(is_training, channels_data_format)
+            
+            net = lmnet_block('squeeze', inputs, squeeze_depth, 1)
+            e1x1 = lmnet_block('e1x1', net, expand_depth, 1)
+            e3x3 = lmnet_block('e3x3', net, expand_depth, 3)
+            return tf.concat([e3x3, e1x1], concat_axis)
 
     def base(self, images, is_training, *args, **kwargs):
         channels_data_format = 'channels_last' if self.data_format == 'NHWC' else 'channels_first'
         lmnet_block = self._get_lmnet_block(is_training, channels_data_format)
 
         self.images = images
-
+        print(images.shape)
+        x = self._space_to_depth(name='space2depth1', inputs=images)
+        print(x.shape)
+        x = lmnet_block('conv1', x, 16, 1)
+        print(x.shape)
+        x = self._space_to_depth(name='space2depth2', inputs=x)
+        print(x.shape)
+        #x = self.fire_module(is_training,x,32,32,scope="conv2")
+        #x = lmnet_block('conv2', x, 64, 3)
+        print(x.shape)
+        #x = lmnet_block('conv3', x, 64, 3)
+        x = self.fire_module(is_training,x,32,32,scope="conv3")
+        print(x.shape)
+        x = self._space_to_depth(name='space2depth3', inputs=x)
+        print(x.shape)
+        x = self.fire_module(is_training,x,32,128,scope="conv4")
+        #x = lmnet_block('conv4', x, 256, 3)
+        print(x.shape)
+        #x = self.fire_module(is_training,x,32,128,scope="conv5")
+        #x = lmnet_block('conv5', x, 256, 3)
+        print(x.shape)
+        #x = self.fire_module(is_training,x,32,128,scope="conv6")
+        #x = lmnet_block('conv6', x, 256, 3)
+        print(x.shape)
+        x = self.fire_module(is_training,x,32,128,scope="conv7")
+        #x = lmnet_block('conv7', x, 256, 3)
+        print(x.shape)
+        x = self._depth_to_space(name='depth2space1', inputs=x)
+        print(x.shape)
+        x = self.fire_module(is_training,x,32,64,scope="conv8")
+        #x = lmnet_block('conv8', x, 128, 3)
+        print(x.shape)
+        x = self._depth_to_space(name='depth2space2', inputs=x)
+        print(x.shape)
+        x = self.fire_module(is_training,x,32,64,scope="conv9")
+        #x = lmnet_block('conv9', x, 128, 3)
+        print(x.shape)
+        x = self._depth_to_space(name='depth2space3', inputs=x)
+        print(x.shape)
+        x = lmnet_block('conv10', x, 32, 3)
+        print(x.shape)
+        x = lmnet_block('conv11', x, self.num_classes, 3)
+        print(x.shape)
+        '''
         x = self._space_to_depth(name='space2depth1', inputs=images)
         x = lmnet_block('conv1', x, 16, 1)
         x = self._space_to_depth(name='space2depth2', inputs=x)
-        x = lmnet_block('conv2', x, 64, 3)
-        x = lmnet_block('conv3', x, 64, 3)
+        x = lmnet_block('conv2', x, 16, 3)
+        x = lmnet_block('conv3', x, 16, 3)
         x = self._space_to_depth(name='space2depth3', inputs=x)
-        x = lmnet_block('conv4', x, 256, 3)
-        x = lmnet_block('conv5', x, 256, 3)
-        x = lmnet_block('conv6', x, 256, 3)
-        x = lmnet_block('conv7', x, 256, 3)
+        #x = self.fire_module(is_training,x,16,32,scope="conv4")
+        print(x.shape)
+        #x = self.fire_module(is_training,x,64,64,scope="conv5")
+        #x = lmnet_block('conv6', x, 256, 3)
+        #x = lmnet_block('conv7', x, 256, 3)
         x = self._depth_to_space(name='depth2space1', inputs=x)
+        print(x.shape)
+        #x = self.fire_module(is_training,x,16,64,scope="conv8")
         x = lmnet_block('conv8', x, 128, 3)
         x = self._depth_to_space(name='depth2space2', inputs=x)
-        x = lmnet_block('conv9', x, 128, 3)
+        print(x.shape)
+        #x = self.fire_module(is_training,x,32,64,scope="conv9")
         x = self._depth_to_space(name='depth2space3', inputs=x)
-        x = lmnet_block('conv10', x, 32, 3)
+        print(x.shape)
+        #x = lmnet_block('conv10', x, 64, 3)
+        print(x.shape)
         x = lmnet_block('conv11', x, self.num_classes, 3)
-
+        print(x.shape)
+        '''
         return x
 
 
