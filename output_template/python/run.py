@@ -159,6 +159,7 @@ def run_prediction(input_image, model, config_file, max_percent_incorrect_values
     "--input_image",
     type=click.Path(exists=True),
     help="Input image filename",
+    default="../../inference_test_data/5605039097_05baa93bfd_m.jpg",
 )
 @click.option(
     "-m",
@@ -169,13 +170,14 @@ def run_prediction(input_image, model, config_file, max_percent_incorrect_values
         Inference Model filename
         (-l is deprecated please use -m instead)
     """,
-    default="../models/lib/lib_fpga.so",
+    default="../models/lib/lib_x86.so",
 )
 @click.option(
     "-c",
     "--config_file",
     type=click.Path(exists=True),
     help="Config file Path",
+    default="../models/meta.yaml",
 )
 def main(input_image, model, config_file):
     _check_deprecated_arguments()

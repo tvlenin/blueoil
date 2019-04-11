@@ -98,37 +98,22 @@ void quantized_matrix_multiplication_body(
               if (end - k > 2) CONV(0, 2)
               if (end - k > 3) CONV(0, 3)
             }
-<<<<<<< HEAD
-            if (A.rows() - i > 1) {
-              T_UINT a = *A.data(i+1, j+j2);
-=======
             if (A.rows() - i > 0) {
               const auto a = QUANTIZED_PACKED(*A.data(i+1, j+j2));
->>>>>>> 08077c76e6bd0edc3dd855262217c64a27b7d962
               if (end - k > 0) CONV(1, 0)
               if (end - k > 1) CONV(1, 1)
               if (end - k > 2) CONV(1, 2)
               if (end - k > 3) CONV(1, 3)
             }
-<<<<<<< HEAD
-            if (A.rows() - i > 2) {
-              T_UINT a = *A.data(i+2, j+j2);
-=======
             if (A.rows() - i > 0) {
               const auto a = QUANTIZED_PACKED(*A.data(i+2, j+j2));
->>>>>>> 08077c76e6bd0edc3dd855262217c64a27b7d962
               if (end - k > 0) CONV(2, 0)
               if (end - k > 1) CONV(2, 1)
               if (end - k > 2) CONV(2, 2)
               if (end - k > 3) CONV(2, 3)
             }
-<<<<<<< HEAD
-            if (A.rows() - i > 3) {
-              T_UINT a = *A.data(i+3, j+j2);
-=======
             if (A.rows() - i > 0) {
               const auto a = QUANTIZED_PACKED(*A.data(i+3, j+j2));
->>>>>>> 08077c76e6bd0edc3dd855262217c64a27b7d962
               if (end - k > 0) CONV(3, 0)
               if (end - k > 1) CONV(3, 1)
               if (end - k > 2) CONV(3, 2)

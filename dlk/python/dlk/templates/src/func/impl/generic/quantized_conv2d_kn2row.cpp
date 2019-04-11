@@ -51,37 +51,38 @@ void ApplyThresholds(
     dlk::MatrixView<BIN_CONV_OUTPUT, dlk::MatrixOrder::ColMajor> &result,
     const binary_convolution_parameters &p) {
   Measurement::Start("ApplyThresholds");
-
+  T_INT ts [NUM_OF_A2W1_THRESHOLD-1];
   for (unsigned int i = 0; i < result.rows(); ++i) {
     for (unsigned int j = 0; j < result.cols(); ++j) {
       BIN_CONV_OUTPUT d = *result.data(i, j);
-      T_INT ts0 = p.thresholds[NUM_OF_A2W1_THRESHOLD * i];
-      T_INT ts1 = p.thresholds[NUM_OF_A2W1_THRESHOLD * i + 1];
-      T_INT ts2 = p.thresholds[NUM_OF_A2W1_THRESHOLD * i + 2];
-      T_INT flag = p.thresholds[NUM_OF_A2W1_THRESHOLD * i + 3];
+      for(int k = 0;k < NUM_OF_A2W1_THRESHOLD - 1; k++){
+        ts[k] = p.thresholds[NUM_OF_A2W1_THRESHOLD * i+k];
+      }
+      T_INT flag = p.thresholds[NUM_OF_A2W1_THRESHOLD * i + (NUM_OF_A2W1_THRESHOLD -1)];
       BIN_CONV_OUTPUT new_d;
 
       if (flag == 1) { // increasing function
-        if (d < ts0)
-          new_d = 0;
-        else if (d < ts1)
-          new_d = 1;
-        else if (d < ts2)
-          new_d = 2;
-        else
-          new_d = 3;
-      } else if (flag == -1) { // decreasing function
-        if (d > ts2)
-          new_d = 0;
-        else if (d > ts1)
-          new_d = 1;
-        else if (d > ts0)
-          new_d = 2;
-        else
-          new_d = 3;
-      } else {                            // constant function
+        for(int cont = 0; cont < NUM_OF_A2W1_THRESHOLD - 1  ; cont++){
+          if( d < ts[cont]){
+            new_d = cont;
+            break;
+          }
+        }
+        if (d >= ts[NUM_OF_A2W1_THRESHOLD-2])
+          new_d = NUM_OF_A2W1_THRESHOLD-1;
+
+      }else if (flag == -1) { // decreasing function
+         for(int cont = NUM_OF_A2W1_THRESHOLD - 2; cont >= 0  ; cont--){
+            if( d > ts[cont]){
+            new_d = cont - (NUM_OF_A2W1_THRESHOLD - 2) ;
+            break;
+          }
+        }
+        if (d <= ts[0])
+          new_d = NUM_OF_A2W1_THRESHOLD-1;
+      }else {
         new_d = flag - 2;                 // note: 2 is a magic number!
-        assert(0 <= new_d && new_d <= 3); // unsinged 2bits
+        assert(0 <= new_d && new_d <= 2); // unsinged 2bits
       }
       *result.data(i, j) = new_d;
     }
@@ -126,7 +127,7 @@ void QuantizedConv2DKn2Row(QUANTIZED_NOT_PACKED input[],
       p.device_input_buf, ic / 16, ih * iw);
   auto output_ = MatrixView<BIN_CONV_OUTPUT, MatrixOrder::ColMajor>(
       p.device_output_buf, oc, ih * iw);
-
+  printf("kw = %d", kw);
   if (kh == kw && kw == 3) {
     unsigned bufsize = oc * kh * kw * ih * iw;
     BIN_CONV_OUTPUT *kn2row_buf = new BIN_CONV_OUTPUT[bufsize]();
