@@ -30,8 +30,13 @@ class Resnet(Base):
             learning_rate_kwargs={},
             classes=[],
             is_debug=False,
+            activation_quantizer=None,
+            activation_quantizer_kwargs=None,
+            weight_quantizer=None,
+            weight_quantizer_kwargs=None,
+            data_format = 'NHWC',
             image_size=[448, 448],  # [height, width]
-            batch_size=64,
+            batch_size=2,
             weight_decay_rate=0.0001,
             num_residual=18,
     ):

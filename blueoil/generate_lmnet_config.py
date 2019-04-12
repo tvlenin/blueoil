@@ -45,6 +45,10 @@ _NETWORK_NAME_NETWORK_MODULE_CLASS = {
         "network_module": "lm_resnet",
         "network_class": "LmResnetQuantize",
     },
+    "Resnet": {
+        "network_module": "resnet",
+        "network_class": "Resnet",
+    },
     "LMFYoloQuantize": {
         "network_module": "lm_fyolo",
         "network_class": "LMFYoloQuantize",
