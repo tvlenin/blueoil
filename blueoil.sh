@@ -95,6 +95,7 @@ SHARED_DOCKER_OPTIONS="--rm -t -u ${USER_ID}:${GROUP_ID} ${PYHONPATHS}"
 if [ -e lmnet ] && [ -e blueoil ] ; then
 	touch lmnet/lmnet/__init__.py
 	SHARED_DOCKER_OPTIONS=${SHARED_DOCKER_OPTIONS}" \
+		-v ${ABS_BASE_DIR}/dlk:${GUEST_HOME_DIR}/dlk \
 		-v ${ABS_BASE_DIR}/lmnet:${GUEST_HOME_DIR}/lmnet \
 		-v ${ABS_BASE_DIR}/blueoil:${GUEST_HOME_DIR}/blueoil"
 fi

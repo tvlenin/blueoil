@@ -55,6 +55,10 @@ semantic_segmentation_network_definitions = [
         'name': 'LmSegnetV1Quantize',
         'desc': 'Quantized LeapMind original semantic segmentation network, version 1.',
     },
+        {
+        'name': 'LMBiSeNetQuantize',
+        'desc': 'Quantized LeapMind original semantic segmentation network, version 1.',
+    },
 ]
 
 IMAGE_SIZE_VALIDATION = {
@@ -71,6 +75,10 @@ IMAGE_SIZE_VALIDATION = {
         "divider": 32,
     },
     "LmSegnetV1Quantize": {
+        "max_size": 512,
+        "divider": 8,
+    },
+    "LMBiSeNetQuantize": {
         "max_size": 512,
         "divider": 8,
     },

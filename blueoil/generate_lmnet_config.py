@@ -52,6 +52,10 @@ _NETWORK_NAME_NETWORK_MODULE_CLASS = {
         "network_module": "lm_segnet_v1",
         "network_class": "LmSegnetV1Quantize",
     },
+    "LMBiSeNetQuantize": {
+        "network_module": "lm_bisenet",
+        "network_class": "LMBiSeNetQuantize",
+    },
 }
 
 _DATASET_FORMAT_DATASET_MODULE_CLASS = {
