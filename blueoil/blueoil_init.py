@@ -40,6 +40,13 @@ classification_network_definitions = [
     {
         'name': 'ResNetQuantize',
         'desc': 'Quantized ResNet 18. Accuracy is better than LmnetV1Quantize.',
+    },    {
+        'name': 'Alexnet',
+        'desc': 'Quantized Alexnet . ',
+    },
+    {
+        'name': 'InceptionV3',
+        'desc': 'Quantized InceptionV3. ',
     },
 ]
 
@@ -63,6 +70,14 @@ IMAGE_SIZE_VALIDATION = {
         "divider": 16,
     },
     "ResNetQuantize": {
+        "max_size": 512,
+        "divider": 16,
+    },
+    "Alexnet": {
+        "max_size": 512,
+        "divider": 16,
+    },
+    "InceptionV3": {
         "max_size": 512,
         "divider": 16,
     },

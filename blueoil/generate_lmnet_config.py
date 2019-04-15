@@ -49,6 +49,15 @@ _NETWORK_NAME_NETWORK_MODULE_CLASS = {
         "network_module": "resnet",
         "network_class": "Resnet",
     },
+    
+    "Alexnet": {
+        "network_module": "alexnet",
+        "network_class": "AlexnetQuantize",
+    },
+    "InceptionV3": {
+        "network_module": "inception_v3",
+        "network_class": "InceptionV3Quantize",
+    },
     "LMFYoloQuantize": {
         "network_module": "lm_fyolo",
         "network_class": "LMFYoloQuantize",
