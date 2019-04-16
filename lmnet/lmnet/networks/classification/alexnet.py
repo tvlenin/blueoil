@@ -71,32 +71,28 @@ class Alexnet(Base):
         #with tf.variable_scope(scope, 'alexnet_v2', [self.images]) as sc:
         # Collect outputs for conv2d, fully_connected and max_pool2d.
         #with tf.variable_scope('base',[tf.layers.conv2d,tf.layers.average_pooling2d]):
-        net = tf.layers.conv2d(self.images, 64, [3, 3], strides=[4,4], padding='SAME',name='conv1')
+        net = tf.layers.conv2d(self.images, 64, [3, 3], strides=[1,1], padding='SAME',name='conv1')
+        net = self._space_to_depth(net,4,'pool1')
         print(net.shape)
-        net = tf.layers.average_pooling2d(net, [3, 3], strides=[2,2],padding='SAME', name='pool1')
-        print(net.shape)
-        net = tf.layers.conv2d(net, 192, [5, 5], name='conv2',padding='SAME')
-        print(net.shape)
-        net = tf.layers.average_pooling2d(net, [3, 3], strides=[2,2],padding='SAME', name='pool2')
+        net = self._space_to_depth(net,2,'pool11')
+        #net = tf.layers.average_pooling2d(net, [3, 3], strides=[2,2],padding='SAME', name='pool1')
+        net = tf.layers.conv2d(net, 192, [3, 3], name='conv2',padding='SAME')
+        #net = tf.layers.average_pooling2d(net, [3, 3], strides=[2,2],padding='SAME', name='pool2')
+        net = self._space_to_depth(net,2,'pool2')
         print(net.shape)
         net = tf.layers.conv2d(net, 384, [3, 3], name='conv3')
         net = tf.layers.conv2d(net, 384, [3, 3], name='conv4')
         net = tf.layers.conv2d(net, 256, [3, 3], name='conv5')
-        net = tf.layers.average_pooling2d(net,  [3, 3], strides=[2,2],padding='SAME', name='pool5')
+        #net = tf.layers.average_pooling2d(net,  [3, 3], strides=[2,2],padding='SAME', name='pool5')
+        net = self._space_to_depth(net,2,'pool5')
+        
         print(net.shape)
-        # Use conv2d instead of fully_connected layers.
-        #with tf.variable_scope("conv2d",[tf.layers.conv2d,tf.layers.average_pooling2d]):
-        net = tf.layers.conv2d(net, 128, [5, 5], padding='VALID',name='fc6')
+        net = tf.layers.conv2d(net, 384, [3, 3], padding='Valid',name='fc6')
         net = tf.layers.dropout(net, dropout_keep_prob,name='dropout6')
-        net = tf.layers.conv2d(net, 128, [1, 1], name='fc7')
-        #if global_pool:
-        #    net = tf.reduce_mean(net, [1, 2], keep_dims=True, name='global_pool')
-        if self.num_classes:
-            net = tf.layers.dropout(net, dropout_keep_prob, name='dropout7')
-            net = tf.layers.conv2d(net, self.num_classes, [1, 1],name='fc8')
-        if spatial_squeeze:
-            #net = tf.squeeze(net, [1, 2], name='fc8/squeezed')
-            net = tf.reshape(net, [-1, self.num_classes], name='pool7_reshape')
+        net = tf.layers.conv2d(net, 128, [2, 2], name='fc7')
+        net = tf.layers.dropout(net, dropout_keep_prob, name='dropout7')
+        net = tf.layers.conv2d(net, self.num_classes, [1, 1],name='fc8')
+        net = tf.reshape(net, [-1, self.num_classes], name='pool7_reshape')
         return net
 
 #Only change the LmnetV1 and the class name
