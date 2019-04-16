@@ -48,6 +48,10 @@ classification_network_definitions = [
         'name': 'InceptionV3',
         'desc': 'Quantized InceptionV3. ',
     },
+    {
+        'name': 'Vgg',
+        'desc': 'Quantized VGG. ',
+    },
 ]
 
 object_detection_network_definitions = [
@@ -78,6 +82,10 @@ IMAGE_SIZE_VALIDATION = {
         "divider": 16,
     },
     "InceptionV3": {
+        "max_size": 512,
+        "divider": 16,
+    },
+    "Vgg": {
         "max_size": 512,
         "divider": 16,
     },

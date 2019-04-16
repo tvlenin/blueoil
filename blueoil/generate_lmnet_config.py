@@ -58,6 +58,10 @@ _NETWORK_NAME_NETWORK_MODULE_CLASS = {
         "network_module": "inception_v3",
         "network_class": "InceptionV3Quantize",
     },
+    "Vgg": {
+        "network_module": "lm_vgg",
+        "network_class": "Vgg16NetworkQuantize",
+    },
     "LMFYoloQuantize": {
         "network_module": "lm_fyolo",
         "network_class": "LMFYoloQuantize",

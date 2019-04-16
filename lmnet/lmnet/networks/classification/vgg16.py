@@ -37,7 +37,7 @@ class Vgg16Network(BaseNetwork):
             is_debug=is_debug
         )
 
-    def build(self, images, is_training):
+    def base(self, images, is_training):
         keep_prob = tf.cond(is_training, lambda: tf.constant(0.5), lambda: tf.constant(1.0))
 
         self.input = self.convert_rbg_to_bgr(images)
