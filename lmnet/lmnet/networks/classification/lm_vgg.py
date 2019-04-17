@@ -93,12 +93,12 @@ class Vgg16Network(Base):
         net = tf.layers.conv2d(net, 512, [3, 3], name='conv52',padding='SAME')
         
         net = tf.layers.max_pooling2d(net,  2, 2,name="pool5",padding='SAME')
-        
-        print(net.shape)
-        net = tf.layers.conv2d(net, 4092, [3, 3], padding='Valid',name='fc6')
+        #3x3 instead 7x7
+        net = tf.layers.conv2d(net, 512, [3, 3], padding='Valid',name='fc6')
+        #extra maxpooling
         net = tf.layers.max_pooling2d(net,  2, 2,name="pool6")
         net = tf.layers.dropout(net, keep_prob,name='dropout6')
-        net = tf.layers.conv2d(net, 4092, [2, 2], name='fc7')
+        net = tf.layers.conv2d(net, 512, [2, 2], name='fc7')
         net = tf.layers.dropout(net, keep_prob, name='dropout7')
         net = tf.layers.conv2d(net, self.num_classes, [1, 1],name='fc8')
         net = tf.reshape(net, [-1, self.num_classes], name='pool7_reshape')
