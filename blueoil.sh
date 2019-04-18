@@ -86,8 +86,8 @@ GUEST_OUTPUT_DIR="${GUEST_HOME_DIR}/saved"
 USER_ID=$(id -u)
 GROUP_ID=$(id -g)
 # Shared docker options
-PYHONPATHS="-e PYTHONPATH=/home/blueoil:/home/blueoil/lmnet:/home/blueoil/dlk/python/dlk"
-SHARED_DOCKER_OPTIONS="--rm -t -u ${USER_ID}:${GROUP_ID} ${PYHONPATHS}"
+PYTHONPATHS="-e PYTHONPATH=/home/blueoil:/home/blueoil/lmnet:/home/blueoil/dlk/python/dlk"
+SHARED_DOCKER_OPTIONS="--rm -t -u ${USER_ID}:${GROUP_ID} ${PYTHONPATHS}"
 
 # Mount source code directories if they are exist on host.
 # Docker's -v option overwrite container's directory with mounted host directory.
