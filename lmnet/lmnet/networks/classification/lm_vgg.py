@@ -65,42 +65,69 @@ class Vgg16Network(Base):
 
         self.images = images
         
-
-        net = tf.layers.conv2d(self.images, 64, [3, 3], strides=[1,1], padding='SAME',name='conv1')
-        net = tf.layers.conv2d(self.images, 64, [3, 3], strides=[1,1], padding='SAME',name='conv1_1')
-        
+        four_letter_data_format = 'NHWC'
+        net = tf.layers.conv2d(self.images, 32, [3, 3], strides=[1,1], padding='SAME',name='conv1')
+        #net = tf.contrib.layers.batch_norm(net,decay=0.99,scale=True,center=True,updates_collections=None,is_training=is_training,data_format=four_letter_data_format)
+        #net =self.activation(net)
+        #net = tf.layers.conv2d(self.images, 32, [3, 3], strides=[1,1], padding='SAME',name='conv1_1')
+        net = tf.contrib.layers.batch_norm(net,decay=0.99,scale=True,center=True,updates_collections=None,is_training=is_training,data_format=four_letter_data_format)
+        net =self.activation(net)
         net = tf.layers.max_pooling2d(net,  2, 2,name="pool1")
 
-        net = tf.layers.conv2d(net, 128, [3, 3], name='conv2',padding='SAME')
-        net = tf.layers.conv2d(net, 128, [3, 3], name='conv21',padding='SAME')
-
+        net = tf.layers.conv2d(net, 64, [3, 3], name='conv2',padding='SAME')
+        net = tf.contrib.layers.batch_norm(net,decay=0.99,scale=True,center=True,updates_collections=None,is_training=is_training,data_format=four_letter_data_format)
+        net =self.activation(net)
+        net = tf.layers.conv2d(net, 64, [3, 3], name='conv21',padding='SAME')
+        net = tf.contrib.layers.batch_norm(net,decay=0.99,scale=True,center=True,updates_collections=None,is_training=is_training,data_format=four_letter_data_format)
+        net =self.activation(net)
         net = tf.layers.max_pooling2d(net,  2, 2,name="pool2")
     
-        net = tf.layers.conv2d(net, 256, [3, 3], name='conv3',padding='SAME')
-        net = tf.layers.conv2d(net, 256, [3, 3], name='conv31',padding='SAME')
-        net = tf.layers.conv2d(net, 256, [3, 3], name='conv32',padding='SAME')
+        net = tf.layers.conv2d(net, 128, [3, 3], name='conv3',padding='SAME')
+        net = tf.contrib.layers.batch_norm(net,decay=0.99,scale=True,center=True,updates_collections=None,is_training=is_training,data_format=four_letter_data_format)
+        net =self.activation(net)
+        net = tf.layers.conv2d(net, 128, [3, 3], name='conv31',padding='SAME')
+        net = tf.contrib.layers.batch_norm(net,decay=0.99,scale=True,center=True,updates_collections=None,is_training=is_training,data_format=four_letter_data_format)
+        net =self.activation(net)
+        #net = tf.layers.conv2d(net, 256, [3, 3], name='conv32',padding='SAME')
+
 
         net = tf.layers.max_pooling2d(net,  2, 2,name="pool3",padding='SAME')
 
-        net = tf.layers.conv2d(net, 512, [3, 3], name='conv4',padding='SAME')
-        net = tf.layers.conv2d(net, 512, [3, 3], name='conv41',padding='SAME')
-        net = tf.layers.conv2d(net, 512, [3, 3], name='conv42',padding='SAME')
+        net = tf.layers.conv2d(net, 256, [3, 3], name='conv4',padding='SAME')
+        net = tf.contrib.layers.batch_norm(net,decay=0.99,scale=True,center=True,updates_collections=None,is_training=is_training,data_format=four_letter_data_format)
+        net =self.activation(net)
+        net = tf.layers.conv2d(net, 256, [3, 3], name='conv41',padding='SAME')
+        net = tf.contrib.layers.batch_norm(net,decay=0.99,scale=True,center=True,updates_collections=None,is_training=is_training,data_format=four_letter_data_format)
+        net =self.activation(net)
+        #net = tf.layers.conv2d(net, 512, [3, 3], name='conv42',padding='SAME')
 
         net = tf.layers.max_pooling2d(net,  2, 2,name="pool4")
 
-        net = tf.layers.conv2d(net, 512, [3, 3], name='conv5',padding='SAME')
-        net = tf.layers.conv2d(net, 512, [3, 3], name='conv51',padding='SAME')
-        net = tf.layers.conv2d(net, 512, [3, 3], name='conv52',padding='SAME')
-        
-        net = tf.layers.max_pooling2d(net,  2, 2,name="pool5",padding='SAME')
+        net = tf.layers.conv2d(net, 256, [3, 3], name='conv5',padding='SAME')
+        net = tf.contrib.layers.batch_norm(net,decay=0.99,scale=True,center=True,updates_collections=None,is_training=is_training,data_format=four_letter_data_format)
+        net =self.activation(net)
+        net = tf.layers.conv2d(net, 256, [3, 3], name='conv51',padding='SAME')
+        net = tf.contrib.layers.batch_norm(net,decay=0.99,scale=True,center=True,updates_collections=None,is_training=is_training,data_format=four_letter_data_format)
+        net =self.activation(net)
+        #net = tf.layers.conv2d(net, 512, [3, 3], name='conv52',padding='SAME')
+
+        net = tf.layers.max_pooling2d(net,  2, 2,name="pool5")
         #3x3 instead 7x7
-        net = tf.layers.conv2d(net, 512, [3, 3], padding='Valid',name='fc6')
-        #extra maxpooling
-        net = tf.layers.max_pooling2d(net,  2, 2,name="pool6")
+
+        net = tf.layers.conv2d(net, 512, [3, 3],name='fc6')
+        net = tf.contrib.layers.batch_norm(net,decay=0.99,scale=True,center=True,updates_collections=None,is_training=is_training,data_format=four_letter_data_format)
+        net =self.activation(net)
         net = tf.layers.dropout(net, keep_prob,name='dropout6')
-        net = tf.layers.conv2d(net, 512, [2, 2], name='fc7')
+        net = tf.layers.conv2d(net, 512, [3, 3], name='fc7')
+        net = tf.contrib.layers.batch_norm(net,decay=0.99,scale=True,center=True,updates_collections=None,is_training=is_training,data_format=four_letter_data_format)
+        net =self.activation(net)
         net = tf.layers.dropout(net, keep_prob, name='dropout7')
+        net = tf.layers.conv2d(net, 512, [3, 3], name='fc711')
+        net = tf.contrib.layers.batch_norm(net,decay=0.99,scale=True,center=True,updates_collections=None,is_training=is_training,data_format=four_letter_data_format)
+        net =self.activation(net)
         net = tf.layers.conv2d(net, self.num_classes, [1, 1],name='fc8')
+        net = tf.contrib.layers.batch_norm(net,decay=0.99,scale=True,center=True,updates_collections=None,is_training=is_training,data_format=four_letter_data_format)
+        net =self.activation(net)
         net = tf.reshape(net, [-1, self.num_classes], name='pool7_reshape')
         return net
 
