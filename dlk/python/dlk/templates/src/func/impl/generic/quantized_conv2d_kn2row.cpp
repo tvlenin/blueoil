@@ -127,7 +127,7 @@ void QuantizedConv2DKn2Row(QUANTIZED_NOT_PACKED input[],
       p.device_input_buf, ic / 16, ih * iw);
   auto output_ = MatrixView<BIN_CONV_OUTPUT, MatrixOrder::ColMajor>(
       p.device_output_buf, oc, ih * iw);
-  printf("kw = %d", kw);
+
   if (kh == kw && kw == 3) {
     unsigned bufsize = oc * kh * kw * ih * iw;
     BIN_CONV_OUTPUT *kn2row_buf = new BIN_CONV_OUTPUT[bufsize]();
