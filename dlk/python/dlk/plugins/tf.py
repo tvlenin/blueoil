@@ -564,7 +564,7 @@ class Importer(object):
 
         for node in node_list + out_list:
             for idx in node.inputs:
-                hash_table[node.name].append(self.node_dic[idx])
+                hash_table[node.name].append(self.node_dic[idx.replace("^","")])
 
         return hash_table
 
@@ -572,7 +572,7 @@ class Importer(object):
         inputs: List[Any] = []
         if not isinstance(node, Input):
             for idx in node.inputs:
-                inputs.append(self.node_dic[idx])
+                inputs.append(self.node_dic[idx.replace("^","")])
 
         return inputs
 

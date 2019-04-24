@@ -93,12 +93,17 @@ def convert_variables_to_constants(sess, output_node_names=["output"]):
         sess.graph.as_graph_def(add_shapes=True),
         output_node_names,
     )
-
+    
+    '''for node in minimal_graph_def.node:
+        if node.op == 'AssignSub':
+            node.op = 'Sub'
+            if 'use_locking' in node.attr: del node.attr['use_locking']'''
     return minimal_graph_def
 
 
 def save_pb_file(sess, output_dir, output_node_names=["output"], pb_name="minimal_graph_with_shape.pb"):
     minimal_graph_def = convert_variables_to_constants(sess, output_node_names)
+    
     tf.train.write_graph(minimal_graph_def, output_dir, pb_name, as_text=False)
     return pb_name
 

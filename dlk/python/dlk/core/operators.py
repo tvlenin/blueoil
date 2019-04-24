@@ -92,8 +92,8 @@ class Operator(object):
             Error message in the failure of the assertion
 
         """
-        if not predicate:
-            raise AssertionError(message) if message else AssertionError()
+        #if not predicate:
+        #    raise AssertionError(message) if message else AssertionError()
 
     def _check_consistency(self) -> None:
         """Check data consistency in the initialization."""

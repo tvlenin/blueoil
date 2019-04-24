@@ -62,6 +62,10 @@ _NETWORK_NAME_NETWORK_MODULE_CLASS = {
         "network_module": "lm_vgg",
         "network_class": "Vgg16NetworkQuantize",
     },
+    "SqueezeNet": {
+        "network_module": "lm_squeezenet",
+        "network_class": "squeezenetV1Quantize",
+    },
     "LMFYoloQuantize": {
         "network_module": "lm_fyolo",
         "network_class": "LMFYoloQuantize",

@@ -52,6 +52,10 @@ classification_network_definitions = [
         'name': 'Vgg',
         'desc': 'Quantized VGG. ',
     },
+    {
+        'name': 'SqueezeNet',
+        'desc': 'Quantized Squeezenet. ',
+    },
 ]
 
 object_detection_network_definitions = [
@@ -86,6 +90,10 @@ IMAGE_SIZE_VALIDATION = {
         "divider": 16,
     },
     "Vgg": {
+        "max_size": 512,
+        "divider": 16,
+    },
+    "SqueezeNet": {
         "max_size": 512,
         "divider": 16,
     },
