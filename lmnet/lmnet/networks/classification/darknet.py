@@ -255,7 +255,10 @@ class Darknet(Base):
             axis = [1, 2]
         # TODO(wakisaka): global average pooling should use tf.reduce_mean()
 
-        self.pool_6 = tf.reduce_mean(self.conv_19, axis=axis, name="global_average_pool_6")
+        #self.pool_6 = tf.reduce_mean(self.conv_19, axis=axis, name="global_average_pool_6")
+        h = self.conv_19.get_shape()[1].value #if self.data_format == 'NHWC' else x.get_shape()[2].value
+        w = self.conv_19.get_shape()[2].value #if self.data_format == 'NHWC' else x.get_shape()[3].value
+        self.pool_6 = tf.layers.average_pooling2d(name='pool66',inputs=self.conv_19,pool_size=[h, w],padding='VALID',strides=1,data_format='channels_last')
         self.base_output = tf.reshape(self.pool_6, [-1, self.num_classes], name="pool6_reshape")
 
         return self.base_output

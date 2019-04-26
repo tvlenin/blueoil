@@ -19,9 +19,9 @@ import tensorflow as tf
 
 from lmnet.blocks import lmnet_block
 from lmnet.networks.classification.base import Base
-VGG_MEAN = [103.939, 116.779, 123.68]
+from lmnet.blocks import densenet_group 
 #change class name
-class SqueezeNet(Base):
+class DenseNet(Base):
     """template for classification.
     """
     version = 1.0
@@ -59,109 +59,69 @@ class SqueezeNet(Base):
         return output
 
     def base(self, images, is_training, *args, **kwargs):
+        """Base network.
+
+        Args:
+            images: Input images.
+            is_training: A flag for if is training.
+        Returns:
+            tf.Tensor: Inference result.
+        """
+
         channels_data_format = 'channels_last' if self.data_format == 'NHWC' else 'channels_first'
         _lmnet_block = self._get_lmnet_block(is_training, channels_data_format)
 
         self.images = images
-        print(images.shape)
-        keep_prob = tf.cond(is_training, lambda: tf.constant(0.5), lambda: tf.constant(1.0))
+        #224
+        x = _lmnet_block('conv1', images, 32, 3)
+        x = tf.layers.max_pooling2d(x, 2, 2,name="pool_1")
+        #112
+        x = _lmnet_block('conv3', x, 32, 3)
+        x = tf.layers.max_pooling2d(x, 2, 2,name="pool_2")
+        #56
+        x = densenet_group("dense1",x,4,32)
+        x = _lmnet_block('transition1', x, x.shape[-1], 1)
+        x = tf.layers.average_pooling2d(name="pool_transition1",inputs=x, pool_size=[2,2], strides=2, data_format=channels_data_format)
+        #28
+        x = densenet_group("dense2",x,8,32)
+        x = _lmnet_block('transition2', x, x.shape[-1], 1)
+        x = tf.layers.average_pooling2d(name="pool_transition2",inputs=x, pool_size=[2,2], strides=2, data_format=channels_data_format)
+        #14
+        x = densenet_group("dense3",x,12,32)
+        x = _lmnet_block('transition3', x, x.shape[-1], 1)
+        x = tf.layers.average_pooling2d(name="pool_transition3",inputs=x, pool_size=[2,2], strides=2, data_format=channels_data_format)
+        #7
+        x = densenet_group("dense4",x,16,32)
+        #7
+        x = tf.layers.dropout(x, training=is_training)
+        kernel_initializer = tf.random_normal_initializer(mean=0.0, stddev=0.01)
 
-        self.images = images
-        
-        four_letter_data_format = 'NHWC'
-        #
-        net = _lmnet_block('conv1',self.images, 32, 3)
-        #
-        net = tf.layers.max_pooling2d(net,  2, 2,name="pool1")
-        #
-        net = _lmnet_block('conv2',net, 32, 3)
-        #
-        net = tf.layers.max_pooling2d(net,  2, 2,name="pool1_1")
-        #
-        print(net.shape)
-        #squeeze layer
-        squeeze1 = _lmnet_block('squeze1',net, 32, 1)
-        #expand layer
-        k1_relu = _lmnet_block('squeze11',squeeze1, 64, 1)
-        k3_relu = _lmnet_block('squeze13',squeeze1, 64, 3)
-        net = tf.concat([k1_relu,k3_relu],axis=3)
-        #squeeze layer
-        squeeze2 = _lmnet_block('squeze2',net, 32, 1)
-        #expand layer
-        k1_relu = _lmnet_block('squeze21',squeeze2, 64, 1)
-        k3_relu = _lmnet_block('squeze23',squeeze2, 64, 3)
-        net = tf.concat([k1_relu,k3_relu],axis=3)
-        
-        #
-        net = tf.layers.max_pooling2d(net,  2, 2,name="pool2")
-        print(net.shape)
-        #squeeze layer
-        #squeeze layer
-        squeeze3 = _lmnet_block('squeze3',net, 32, 1)
-        #expand layer
-        k1_relu = _lmnet_block('squeze31',squeeze3, 128, 1)
-        k3_relu = _lmnet_block('squeze33',squeeze3, 128, 3)
-        net = tf.concat([k1_relu,k3_relu],axis=3)
-        #
-        #squeeze layer
-        squeeze4 = _lmnet_block('squeze4',net, 32, 1)
-        #expand layer
-        k1_relu = _lmnet_block('squeze41',squeeze4, 128, 1)
-        k3_relu = _lmnet_block('squeze43',squeeze4, 128, 3)
-        net = tf.concat([k1_relu,k3_relu],axis=3)
-        #
-        net = tf.layers.max_pooling2d(net,  2, 2,name="pool3")   
-        #
-        print(net.shape)
-        #squeeze layer
-        squeeze5 = _lmnet_block('squeze5',net, 64, 1)
-        #expand layer
-        k1_relu = _lmnet_block('squeze51',squeeze5, 128, 1)
-        k3_relu = _lmnet_block('squeze53',squeeze5, 128, 3)
-        net = tf.concat([k1_relu,k3_relu],axis=3)
-        #
-        #squeeze layer
-        squeeze6 = _lmnet_block('squeze6',net, 64, 1)
-        #expand layer
-        k1_relu = _lmnet_block('squeze61',squeeze6, 128, 1)
-        k3_relu = _lmnet_block('squeze63',squeeze6, 128, 3)
-        net = tf.concat([k1_relu,k3_relu],axis=3)
-        #
-        #squeeze layer
-        squeeze7 = _lmnet_block('squeze7',net, 128, 1)
-        #expand layer
-        k1_relu = _lmnet_block('squeze71',squeeze7, 256, 1)
-        k3_relu = _lmnet_block('squeze73',squeeze7, 256, 3)
-        net = tf.concat([k1_relu,k3_relu],axis=3)
-        #
-        #squeeze layer
-        squeeze8 = _lmnet_block('squeze8',net, 128, 1)
-        #expand layer
-        k1_relu = _lmnet_block('squeze81',squeeze8, 256, 1)
-        k3_relu = _lmnet_block('squeze83',squeeze8, 256, 3)
-        net = tf.concat([k1_relu,k3_relu],axis=3)
-        #
-        print(net.shape)
-        net = tf.layers.dropout(net,rate=0.5,training=is_training)
+        x = tf.layers.conv2d(name='conv7',
+                             inputs=x,
+                             filters=self.num_classes,
+                             kernel_size=1,
+                             kernel_initializer=kernel_initializer,
+                             activation=None,
+                             use_bias=True,
+                             data_format=channels_data_format)
 
-        #w_init = tf.truncated_normal_initializer(mean=0.0,stddev=(1.0/int(net.shape[2])))
-        #net = tf.layers.conv2d(net,10,[3,3],[1,1],padding='valid',kernel_initializer=w_init)
-        net = _lmnet_block('full',net, 10, 3)
-        #batch_norm = tf.contrib.layers.batch_norm(net,decay=0.99,scale=True,center=True,updates_collections=None,is_training=is_training,data_format=four_letter_data_format)
-        #net =self.activation(batch_norm)
-        print(net.shape)
-        net = tf.layers.average_pooling2d(net,pool_size=14,strides=1,name="pool_end")
-        #
-        print(net.shape)
-        pool_shape = tf.shape(net)
-        net = tf.reshape(net,shape=(pool_shape[0],pool_shape[3])) 
-        #tf.reshape(net, [-1, self.num_classes], name='pool7_reshape')
-        return net
+        self._heatmap_layer = x
 
+        h = x.get_shape()[1].value if self.data_format == 'NHWC' else x.get_shape()[2].value
+        w = x.get_shape()[2].value if self.data_format == 'NHWC' else x.get_shape()[3].value
+        x = tf.layers.average_pooling2d(name='pool7',
+                                        inputs=x,
+                                        pool_size=[h, w],
+                                        padding='VALID',
+                                        strides=1,
+                                        data_format=channels_data_format)
 
-    
+        self.base_output = tf.reshape(x, [-1, self.num_classes], name='pool7_reshape')
+
+        return self.base_output
+
 #Only change the LmnetV1 and the class name
-class squeezenetV1Quantize(SqueezeNet):
+class DenseNetQuantize(DenseNet):
     """Lmnet quantize network for classification, version 1.0
 
     Following `args` are used for inference: ``activation_quantizer``, ``activation_quantizer_kwargs``,

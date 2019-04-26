@@ -54,8 +54,9 @@ class Alexnet(Base):
     def _space_to_depth(self, inputs=None, block_size=2, name=''):
         if self.data_format != 'NHWC':
             inputs = tf.transpose(inputs, perm=[self.data_format.find(d) for d in 'NHWC'])
-
-        output = tf.space_to_depth(inputs, block_size=block_size, name=name)
+        
+        output = tf.layers.max_pooling2d(inputs,  2, 2,name=name)
+        #output = tf.space_to_depth(inputs, block_size=block_size, name=name)
 
         if self.data_format != 'NHWC':
             output = tf.transpose(output, perm=['NHWC'.find(d) for d in self.data_format])
@@ -67,23 +68,19 @@ class Alexnet(Base):
                         scope='alexnet_v2',
                         global_pool=False,*args, **kwargs,):
         self.images = images
-        
-        #with tf.variable_scope(scope, 'alexnet_v2', [self.images]) as sc:
-        # Collect outputs for conv2d, fully_connected and max_pool2d.
-        #with tf.variable_scope('base',[tf.layers.conv2d,tf.layers.average_pooling2d]):
-        net = tf.layers.conv2d(self.images, 64, [3, 3], strides=[1,1], padding='SAME',name='conv1')
+        channels_data_format = 'channels_last' if self.data_format == 'NHWC' else 'channels_first'
+        _lmnet_block = self._get_lmnet_block(is_training, channels_data_format)
+
+        #224
+        net = _lmnet_block('conv1', images, 96, 3)
+        #224
         net = self._space_to_depth(net,4,'pool1')
-        print(net.shape)
         net = self._space_to_depth(net,2,'pool11')
-        #net = tf.layers.average_pooling2d(net, [3, 3], strides=[2,2],padding='SAME', name='pool1')
         net = tf.layers.conv2d(net, 192, [3, 3], name='conv2',padding='SAME')
-        #net = tf.layers.average_pooling2d(net, [3, 3], strides=[2,2],padding='SAME', name='pool2')
         net = self._space_to_depth(net,2,'pool2')
-        print(net.shape)
         net = tf.layers.conv2d(net, 384, [3, 3], name='conv3')
         net = tf.layers.conv2d(net, 384, [3, 3], name='conv4')
         net = tf.layers.conv2d(net, 256, [3, 3], name='conv5')
-        #net = tf.layers.average_pooling2d(net,  [3, 3], strides=[2,2],padding='SAME', name='pool5')
         net = self._space_to_depth(net,2,'pool5')
         
         print(net.shape)

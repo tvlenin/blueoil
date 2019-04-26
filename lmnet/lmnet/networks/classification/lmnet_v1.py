@@ -52,8 +52,8 @@ class LmnetV1(Base):
         if self.data_format != 'NHWC':
             inputs = tf.transpose(inputs, perm=[self.data_format.find(d) for d in 'NHWC'])
 
-        output = tf.layers.max_pooling2d(inputs, pool_size=block_size, strides=2, name=name)
         #output = tf.space_to_depth(inputs, block_size=block_size, name=name)
+        output = tf.layers.max_pooling2d(inputs,  2, 2,name=name)
 
         if self.data_format != 'NHWC':
             output = tf.transpose(output, perm=['NHWC'.find(d) for d in self.data_format])
@@ -70,38 +70,22 @@ class LmnetV1(Base):
         """
 
         channels_data_format = 'channels_last' if self.data_format == 'NHWC' else 'channels_first'
-        #_lmnet_block = self._get_lmnet_block(is_training, channels_data_format)
+        _lmnet_block = self._get_lmnet_block(is_training, channels_data_format)
 
         self.images = images
-
-        #x = _lmnet_block('conv1', images, 32, 3)
-        x = tf.layers.conv2d(self.images, filters=32, kernel_size=3, padding='SAME', use_bias=False,data_format=channels_data_format)
-        x = tf.contrib.layers.batch_norm(x,decay=0.99,scale=True,center=True,updates_collections=None,is_training=is_training,data_format='NHWC')
-        x = self.activation(x)
-        x = tf.layers.conv2d(x, filters=64, kernel_size=3, padding='SAME', use_bias=False,data_format=channels_data_format)
-        x = tf.contrib.layers.batch_norm(x,decay=0.99,scale=True,center=True,updates_collections=None,is_training=is_training,data_format='NHWC')
-        x = self.activation(x)
-        #x = _lmnet_block('conv2', x, 64, 3)
+        #224
+        x = _lmnet_block('conv1', images, 32, 3)
+        x = _lmnet_block('conv2', x, 64, 3)
         x = self._space_to_depth(name='pool2', inputs=x)
-        x = tf.layers.conv2d(x, filters=128, kernel_size=3, padding='SAME', use_bias=False,data_format=channels_data_format)
-        x = tf.contrib.layers.batch_norm(x,decay=0.99,scale=True,center=True,updates_collections=None,is_training=is_training,data_format='NHWC')
-        x = self.activation(x)
-        x = tf.layers.conv2d(x, filters=64, kernel_size=3, padding='SAME', use_bias=False,data_format=channels_data_format)
-        x = tf.contrib.layers.batch_norm(x,decay=0.99,scale=True,center=True,updates_collections=None,is_training=is_training,data_format='NHWC')
-        x = self.activation(x)
-        #x = _lmnet_block('conv3', x, 128, 3)
-        #x = _lmnet_block('conv4', x, 64, 3)
+        #112
+        x = _lmnet_block('conv3', x, 128, 3)
+        x = _lmnet_block('conv4', x, 64, 3)
         x = self._space_to_depth(name='pool4', inputs=x)
-        x = tf.layers.conv2d(x, filters=128, kernel_size=3, padding='SAME', use_bias=False,data_format=channels_data_format)
-        x = tf.contrib.layers.batch_norm(x,decay=0.99,scale=True,center=True,updates_collections=None,is_training=is_training,data_format='NHWC')
-        x = self.activation(x)
-        #x = _lmnet_block('conv5', x, 128, 3)
+        #56
+        x = _lmnet_block('conv5', x, 128, 3)
         x = self._space_to_depth(name='pool5', inputs=x)
-        x = tf.layers.conv2d(x, filters=64, kernel_size=3, padding='SAME', use_bias=False,data_format=channels_data_format)
-        x = tf.contrib.layers.batch_norm(x,decay=0.99,scale=True,center=True,updates_collections=None,is_training=is_training,data_format='NHWC')
-        x = self.activation(x)
-        #x = _lmnet_block('conv6', x, 64, 1, activation=tf.nn.relu)
-
+        #28
+        x = _lmnet_block('conv6', x, 64, 1, activation=tf.nn.relu)
         x = tf.layers.dropout(x, training=is_training)
 
         kernel_initializer = tf.random_normal_initializer(mean=0.0, stddev=0.01)

@@ -49,7 +49,14 @@ _NETWORK_NAME_NETWORK_MODULE_CLASS = {
         "network_module": "resnet",
         "network_class": "Resnet",
     },
-    
+    "Darknet": {
+        "network_module": "darknet",
+        "network_class": "DarknetQuantize",
+    },
+    "DenseNet": {
+        "network_module": "lm_densenet",
+        "network_class": "DenseNetQuantize",
+    },
     "Alexnet": {
         "network_module": "alexnet",
         "network_class": "AlexnetQuantize",

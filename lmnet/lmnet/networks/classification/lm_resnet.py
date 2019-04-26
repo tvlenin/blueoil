@@ -62,7 +62,9 @@ class LmResnet(Base):
     def _conv2d_fix_padding(inputs, filters, kernel_size, strides):
         """Convolution layer deals with stride of 2"""
         if strides == 2:
-            inputs = tf.space_to_depth(inputs, block_size=2, name="pool")
+            inputs = tf.layers.max_pooling2d(inputs,  2, 2,name="pool")
+            #inputs = tf.space_to_depth(inputs, block_size=2, name="pool")
+            #output = tf.layers.max_pooling2d(inputs,  2, 2,name="pool")
 
         return tf.layers.conv2d(
             inputs, filters, kernel_size,

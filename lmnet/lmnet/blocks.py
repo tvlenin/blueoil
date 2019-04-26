@@ -88,8 +88,9 @@ def lmnet_block(
         tf.Tensor: Output of current layer block.
     """
     with tf.variable_scope(name, custom_getter=custom_getter):
+        w_init = tf.truncated_normal_initializer(mean=0.0,stddev=(1.0/int(inputs.shape[2])))
         conv = tf.layers.conv2d(inputs, filters=filters, kernel_size=kernel_size, padding='SAME', use_bias=False,
-                                data_format=data_format)
+                                data_format=data_format,kernel_initializer=w_init)
 
         if use_batch_norm:
             # TODO(wenhao) hw supports `tf.contrib.layers.batch_norm` currently. change it when supported.

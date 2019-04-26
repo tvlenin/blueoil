@@ -192,7 +192,8 @@ void quantized_matrix_multiplication(
   const MatrixView<QUANTIZED_PACKED, MatrixOrder::ColMajor>& B,
   MatrixView<BIN_CONV_OUTPUT, MatrixOrder::ColMajor>& C) {
   Measurement::Start("quantized_matrix_multiplication");
-
+  printf("A.cols:%d\n",A.cols());
+  printf("B.rows:%d\n",B.rows());
   assert(A.cols() * 2 == B.rows());
 
   unsigned int chunk_size = B.cols() / std::thread::hardware_concurrency();

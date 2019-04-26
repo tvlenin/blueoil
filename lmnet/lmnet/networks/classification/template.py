@@ -19,9 +19,9 @@ import tensorflow as tf
 
 from lmnet.blocks import lmnet_block
 from lmnet.networks.classification.base import Base
-VGG_MEAN = [103.939, 116.779, 123.68]
+
 #change class name
-class Vgg16Network(Base):
+class InceptionV3(Base):
     """template for classification.
     """
     version = 1.0
@@ -59,142 +59,27 @@ class Vgg16Network(Base):
         return output
 
     def base(self, images, is_training, *args, **kwargs):
-        self.images = images
-        print(images.shape)
-        keep_prob = tf.cond(is_training, lambda: tf.constant(0.5), lambda: tf.constant(1.0))
+        """Base network.
+        Args:
+            images: Input images.
+            is_training: A flag for if is training.
+        Returns:
+            tf.Tensor: Inference result.
+        """
+
+        channels_data_format = 'channels_last' if self.data_format == 'NHWC' else 'channels_first'
+        _lmnet_block = self._get_lmnet_block(is_training, channels_data_format)
 
         self.images = images
-        
-        four_letter_data_format = 'NHWC'
-        net = tf.layers.conv2d(self.images, 32, [3, 3], strides=[1,1], padding='SAME',name='conv1')
-        #net = tf.contrib.layers.batch_norm(net,decay=0.99,scale=True,center=True,updates_collections=None,is_training=is_training,data_format=four_letter_data_format)
-        #net =self.activation(net)
-        #net = tf.layers.conv2d(self.images, 32, [3, 3], strides=[1,1], padding='SAME',name='conv1_1')
-        net = tf.contrib.layers.batch_norm(net,decay=0.99,scale=True,center=True,updates_collections=None,is_training=is_training,data_format=four_letter_data_format)
-        net =self.activation(net)
-        net = tf.layers.max_pooling2d(net,  2, 2,name="pool1")
+        x = self.images
+        self._heatmap_layer = x
 
-        net = tf.layers.conv2d(net, 64, [3, 3], name='conv2',padding='SAME')
-        net = tf.contrib.layers.batch_norm(net,decay=0.99,scale=True,center=True,updates_collections=None,is_training=is_training,data_format=four_letter_data_format)
-        net =self.activation(net)
-        net = tf.layers.conv2d(net, 64, [3, 3], name='conv21',padding='SAME')
-        net = tf.contrib.layers.batch_norm(net,decay=0.99,scale=True,center=True,updates_collections=None,is_training=is_training,data_format=four_letter_data_format)
-        net =self.activation(net)
-        net = tf.layers.max_pooling2d(net,  2, 2,name="pool2")
-    
-        net = tf.layers.conv2d(net, 128, [3, 3], name='conv3',padding='SAME')
-        net = tf.contrib.layers.batch_norm(net,decay=0.99,scale=True,center=True,updates_collections=None,is_training=is_training,data_format=four_letter_data_format)
-        net =self.activation(net)
-        net = tf.layers.conv2d(net, 128, [3, 3], name='conv31',padding='SAME')
-        net = tf.contrib.layers.batch_norm(net,decay=0.99,scale=True,center=True,updates_collections=None,is_training=is_training,data_format=four_letter_data_format)
-        net =self.activation(net)
-        #net = tf.layers.conv2d(net, 256, [3, 3], name='conv32',padding='SAME')
+        self.base_output = x
 
+        return self.base_output
 
-        net = tf.layers.max_pooling2d(net,  2, 2,name="pool3",padding='SAME')
-
-        net = tf.layers.conv2d(net, 256, [3, 3], name='conv4',padding='SAME')
-        net = tf.contrib.layers.batch_norm(net,decay=0.99,scale=True,center=True,updates_collections=None,is_training=is_training,data_format=four_letter_data_format)
-        net =self.activation(net)
-        net = tf.layers.conv2d(net, 256, [3, 3], name='conv41',padding='SAME')
-        net = tf.contrib.layers.batch_norm(net,decay=0.99,scale=True,center=True,updates_collections=None,is_training=is_training,data_format=four_letter_data_format)
-        net =self.activation(net)
-        #net = tf.layers.conv2d(net, 512, [3, 3], name='conv42',padding='SAME')
-
-        net = tf.layers.max_pooling2d(net,  2, 2,name="pool4")
-
-        net = tf.layers.conv2d(net, 256, [3, 3], name='conv5',padding='SAME')
-        net = tf.contrib.layers.batch_norm(net,decay=0.99,scale=True,center=True,updates_collections=None,is_training=is_training,data_format=four_letter_data_format)
-        net =self.activation(net)
-        net = tf.layers.conv2d(net, 256, [3, 3], name='conv51',padding='SAME')
-        net = tf.contrib.layers.batch_norm(net,decay=0.99,scale=True,center=True,updates_collections=None,is_training=is_training,data_format=four_letter_data_format)
-        net =self.activation(net)
-        #net = tf.layers.conv2d(net, 512, [3, 3], name='conv52',padding='SAME')
-
-        net = tf.layers.max_pooling2d(net,  2, 2,name="pool5")
-        #3x3 instead 7x7
-
-        net = tf.layers.conv2d(net, 512, [3, 3],name='fc6')
-        net = tf.contrib.layers.batch_norm(net,decay=0.99,scale=True,center=True,updates_collections=None,is_training=is_training,data_format=four_letter_data_format)
-        net =self.activation(net)
-        net = tf.layers.dropout(net, keep_prob,name='dropout6')
-        net = tf.layers.conv2d(net, 512, [3, 3], name='fc7')
-        net = tf.contrib.layers.batch_norm(net,decay=0.99,scale=True,center=True,updates_collections=None,is_training=is_training,data_format=four_letter_data_format)
-        net =self.activation(net)
-        net = tf.layers.dropout(net, keep_prob, name='dropout7')
-        net = tf.layers.conv2d(net, 512, [3, 3], name='fc711')
-        net = tf.contrib.layers.batch_norm(net,decay=0.99,scale=True,center=True,updates_collections=None,is_training=is_training,data_format=four_letter_data_format)
-        net =self.activation(net)
-        net = tf.layers.conv2d(net, self.num_classes, [1, 1],name='fc8')
-        net = tf.contrib.layers.batch_norm(net,decay=0.99,scale=True,center=True,updates_collections=None,is_training=is_training,data_format=four_letter_data_format)
-        net =self.activation(net)
-        net = tf.reshape(net, [-1, self.num_classes], name='pool7_reshape')
-        return net
-
-
-    def conv_layer(
-        self,
-        name,
-        inputs,
-        filters,
-        kernel_size,
-        strides=1,
-        padding="SAME",
-        activation=tf.nn.sigmoid,
-        *args,
-        **kwargs
-    ):
-        kernel_initializer = tf.contrib.layers.xavier_initializer()
-        biases_initializer = tf.zeros_initializer()
-
-        output = super(Vgg16Network, self).conv_layer(
-            name=name,
-            inputs=inputs,
-            filters=filters,
-            kernel_size=kernel_size,
-            padding=padding,
-            activation=activation,
-            kernel_initializer=kernel_initializer,
-            biases_initializer=biases_initializer,
-            *args,
-            **kwargs
-        )
-
-        return output
-    def fc_layer(
-            self,
-            name,
-            inputs,
-            filters,
-            *args,
-            **kwargs
-    ):
-        kernel_initializer = tf.contrib.layers.xavier_initializer()
-        biases_initializer = tf.zeros_initializer()
-
-        output = super(Vgg16Network, self).fc_layer(
-            name=name,
-            inputs=inputs,
-            filters=filters,
-            kernel_initializer=kernel_initializer,
-            biases_initializer=biases_initializer,
-            *args,
-            **kwargs
-        )
-
-        return output
-    def convert_rbg_to_bgr(self, rgb_images):
-        red, green, blue = tf.split(axis=3, num_or_size_splits=3, value=rgb_images)
-
-        bgr_images = tf.concat(axis=3, values=[
-            blue - VGG_MEAN[0],
-            green - VGG_MEAN[1],
-            red - VGG_MEAN[2],
-        ])
-
-        return bgr_images
 #Only change the LmnetV1 and the class name
-class Vgg16NetworkQuantize(Vgg16Network):
+class InceptionV3Quantize(InceptionV3):
     """Lmnet quantize network for classification, version 1.0
 
     Following `args` are used for inference: ``activation_quantizer``, ``activation_quantizer_kwargs``,

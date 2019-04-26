@@ -66,141 +66,64 @@ class Vgg16Network(Base):
         self.images = images
         
         four_letter_data_format = 'NHWC'
-        #
-        w_init = tf.truncated_normal_initializer(mean=0.0,stddev=(1.0/int(self.images.shape[2])))
-        net = tf.layers.conv2d(self.images,32,[3,3],[1,1],padding='valid',kernel_initializer=w_init)
-        batchnorm = tf.contrib.layers.batch_norm(net,decay=0.99,scale=True,center=True,updates_collections=None,is_training=is_training,data_format=four_letter_data_format)
-        net =self.activation(batchnorm)
-        #
-        net = tf.layers.max_pooling2d(net,  3, 2,name="pool1")
-        #
-        w_init = tf.truncated_normal_initializer(mean=0.0,stddev=(1.0/int(net.shape[2])))
-        net = tf.layers.conv2d(net,32,[3,3],[1,1],padding='valid',kernel_initializer=w_init)
-        batchnorm = tf.contrib.layers.batch_norm(net,decay=0.99,scale=True,center=True,updates_collections=None,is_training=is_training,data_format=four_letter_data_format)
-        net =self.activation(batchnorm)
-        #
-        net = tf.layers.max_pooling2d(net,  3, 2,name="pool1_1")
-        #
-
-        #squeeze layer
-        squeeze_out = tf.layers.conv2d(net,16,[1,1],[1,1],padding="VALID",kernel_initializer=w_init)
-        batch_norm = tf.contrib.layers.batch_norm(squeeze_out,decay=0.99,scale=True,center=True,updates_collections=None,is_training=True,data_format='NHWC')
-        relu_sq = self.activation(batch_norm)
-        #expand layer
-        k1_exp = tf.layers.conv2d(relu_sq,64,[1,1],[1,1],padding="VALID",kernel_initializer=w_init)
-        batch_norm = tf.contrib.layers.batch_norm(k1_exp,decay=0.99,scale=True,center=True,updates_collections=None,is_training=True,data_format='NHWC')
-        k1_relu =self.activation(batch_norm)
-        k3_exp = tf.layers.conv2d(relu_sq,64,[3,3],[1,1],padding="SAME",kernel_initializer=w_init)
-        batch_norm = tf.contrib.layers.batch_norm(k3_exp,decay=0.99,scale=True,center=True,updates_collections=None,is_training=True,data_format='NHWC')
-        k3_relu = self.activation(batch_norm)
-        net = tf.concat([k1_relu,k3_relu],axis=3)
-        #squeeze layer
-        squeeze_out = tf.layers.conv2d(net,16,[1,1],[1,1],padding="VALID",kernel_initializer=w_init)
-        batch_norm = tf.contrib.layers.batch_norm(squeeze_out,decay=0.99,scale=True,center=True,updates_collections=None,is_training=True,data_format='NHWC')
-        relu_sq = self.activation(batch_norm)
-        #expand layer
-        k1_exp = tf.layers.conv2d(relu_sq,64,[1,1],[1,1],padding="VALID",kernel_initializer=w_init)
-        batch_norm = tf.contrib.layers.batch_norm(k1_exp,decay=0.99,scale=True,center=True,updates_collections=None,is_training=True,data_format='NHWC')
-        k1_relu =self.activation(batch_norm)
-        k3_exp = tf.layers.conv2d(relu_sq,64,[3,3],[1,1],padding="SAME",kernel_initializer=w_init)
-        batch_norm = tf.contrib.layers.batch_norm(k3_exp,decay=0.99,scale=True,center=True,updates_collections=None,is_training=True,data_format='NHWC')
-        k3_relu = self.activation(batch_norm)
-        net = tf.concat([k1_relu,k3_relu],axis=3)
+        #224
         
-        #
-        net = tf.layers.max_pooling2d(net,  3, 2,name="pool2")
-        #squeeze layer
-        squeeze_out = tf.layers.conv2d(net,32,[1,1],[1,1],padding="VALID",kernel_initializer=w_init)
-        batch_norm = tf.contrib.layers.batch_norm(squeeze_out,decay=0.99,scale=True,center=True,updates_collections=None,is_training=True,data_format='NHWC')
-        relu_sq = self.activation(batch_norm)
-        #expand layer
-        k1_exp = tf.layers.conv2d(relu_sq,128,[1,1],[1,1],padding="VALID",kernel_initializer=w_init)
-        batch_norm = tf.contrib.layers.batch_norm(k1_exp,decay=0.99,scale=True,center=True,updates_collections=None,is_training=True,data_format='NHWC')
-        k1_relu =self.activation(batch_norm)
-        k3_exp = tf.layers.conv2d(relu_sq,128,[3,3],[1,1],padding="SAME",kernel_initializer=w_init)
-        batch_norm = tf.contrib.layers.batch_norm(k3_exp,decay=0.99,scale=True,center=True,updates_collections=None,is_training=True,data_format='NHWC')
-        k3_relu = self.activation(batch_norm)
-        net = tf.concat([k1_relu,k3_relu],axis=3)
-        #
-        #squeeze layer
-        squeeze_out = tf.layers.conv2d(net,32,[1,1],[1,1],padding="VALID",kernel_initializer=w_init)
-        batch_norm = tf.contrib.layers.batch_norm(squeeze_out,decay=0.99,scale=True,center=True,updates_collections=None,is_training=True,data_format='NHWC')
-        relu_sq = self.activation(batch_norm)
-        #expand layer
-        k1_exp = tf.layers.conv2d(relu_sq,128,[1,1],[1,1],padding="VALID",kernel_initializer=w_init)
-        batch_norm = tf.contrib.layers.batch_norm(k1_exp,decay=0.99,scale=True,center=True,updates_collections=None,is_training=True,data_format='NHWC')
-        k1_relu =self.activation(batch_norm)
-        k3_exp = tf.layers.conv2d(relu_sq,128,[3,3],[1,1],padding="SAME",kernel_initializer=w_init)
-        batch_norm = tf.contrib.layers.batch_norm(k3_exp,decay=0.99,scale=True,center=True,updates_collections=None,is_training=True,data_format='NHWC')
-        k3_relu = self.activation(batch_norm)
-        net = tf.concat([k1_relu,k3_relu],axis=3)
-        #
-        net = tf.layers.max_pooling2d(net,  3, 2,name="pool3")   
-        #
-        #squeeze layer
-        squeeze_out = tf.layers.conv2d(net,48,[1,1],[1,1],padding="VALID",kernel_initializer=w_init)
-        batch_norm = tf.contrib.layers.batch_norm(squeeze_out,decay=0.99,scale=True,center=True,updates_collections=None,is_training=True,data_format='NHWC')
-        relu_sq = self.activation(batch_norm)
-        #expand layer
-        k1_exp = tf.layers.conv2d(relu_sq,192,[1,1],[1,1],padding="VALID",kernel_initializer=w_init)
-        batch_norm = tf.contrib.layers.batch_norm(k1_exp,decay=0.99,scale=True,center=True,updates_collections=None,is_training=True,data_format='NHWC')
-        k1_relu =self.activation(batch_norm)
-        k3_exp = tf.layers.conv2d(relu_sq,192,[3,3],[1,1],padding="SAME",kernel_initializer=w_init)
-        batch_norm = tf.contrib.layers.batch_norm(k3_exp,decay=0.99,scale=True,center=True,updates_collections=None,is_training=True,data_format='NHWC')
-        k3_relu = self.activation(batch_norm)
-        net = tf.concat([k1_relu,k3_relu],axis=3)
-        #
-        #squeeze layer
-        squeeze_out = tf.layers.conv2d(net,48,[1,1],[1,1],padding="VALID",kernel_initializer=w_init)
-        batch_norm = tf.contrib.layers.batch_norm(squeeze_out,decay=0.99,scale=True,center=True,updates_collections=None,is_training=True,data_format='NHWC')
-        relu_sq = self.activation(batch_norm)
-        #expand layer
-        k1_exp = tf.layers.conv2d(relu_sq,192,[1,1],[1,1],padding="VALID",kernel_initializer=w_init)
-        batch_norm = tf.contrib.layers.batch_norm(k1_exp,decay=0.99,scale=True,center=True,updates_collections=None,is_training=True,data_format='NHWC')
-        k1_relu =self.activation(batch_norm)
-        k3_exp = tf.layers.conv2d(relu_sq,192,[3,3],[1,1],padding="SAME",kernel_initializer=w_init)
-        batch_norm = tf.contrib.layers.batch_norm(k3_exp,decay=0.99,scale=True,center=True,updates_collections=None,is_training=True,data_format='NHWC')
-        k3_relu = self.activation(batch_norm)
-        net = tf.concat([k1_relu,k3_relu],axis=3)
-        #
-        #squeeze layer
-        squeeze_out = tf.layers.conv2d(net,64,[1,1],[1,1],padding="VALID",kernel_initializer=w_init)
-        batch_norm = tf.contrib.layers.batch_norm(squeeze_out,decay=0.99,scale=True,center=True,updates_collections=None,is_training=True,data_format='NHWC')
-        relu_sq = self.activation(batch_norm)
-        #expand layer
-        k1_exp = tf.layers.conv2d(relu_sq,256,[1,1],[1,1],padding="VALID",kernel_initializer=w_init)
-        batch_norm = tf.contrib.layers.batch_norm(k1_exp,decay=0.99,scale=True,center=True,updates_collections=None,is_training=True,data_format='NHWC')
-        k1_relu =self.activation(batch_norm)
-        k3_exp = tf.layers.conv2d(relu_sq,256,[3,3],[1,1],padding="SAME",kernel_initializer=w_init)
-        batch_norm = tf.contrib.layers.batch_norm(k3_exp,decay=0.99,scale=True,center=True,updates_collections=None,is_training=True,data_format='NHWC')
-        k3_relu = self.activation(batch_norm)
-        net = tf.concat([k1_relu,k3_relu],axis=3)
-        #
-        #squeeze layer
-        squeeze_out = tf.layers.conv2d(net,64,[1,1],[1,1],padding="VALID",kernel_initializer=w_init)
-        batch_norm = tf.contrib.layers.batch_norm(squeeze_out,decay=0.99,scale=True,center=True,updates_collections=None,is_training=True,data_format='NHWC')
-        relu_sq = self.activation(batch_norm)
-        #expand layer
-        k1_exp = tf.layers.conv2d(relu_sq,256,[1,1],[1,1],padding="VALID",kernel_initializer=w_init)
-        batch_norm = tf.contrib.layers.batch_norm(k1_exp,decay=0.99,scale=True,center=True,updates_collections=None,is_training=True,data_format='NHWC')
-        k1_relu =self.activation(batch_norm)
-        k3_exp = tf.layers.conv2d(relu_sq,256,[3,3],[1,1],padding="SAME",kernel_initializer=w_init)
-        batch_norm = tf.contrib.layers.batch_norm(k3_exp,decay=0.99,scale=True,center=True,updates_collections=None,is_training=True,data_format='NHWC')
-        k3_relu = self.activation(batch_norm)
-        net = tf.concat([k1_relu,k3_relu],axis=3)
-        #
-        net = tf.layers.dropout(net,rate=0.5,training=is_training)
-
-        w_init = tf.truncated_normal_initializer(mean=0.0,stddev=(1.0/int(net.shape[2])))
-        net = tf.layers.conv2d(net,10,[3,3],[1,1],padding='valid',kernel_initializer=w_init)
-        batch_norm = tf.contrib.layers.batch_norm(net,decay=0.99,scale=True,center=True,updates_collections=None,is_training=is_training,data_format=four_letter_data_format)
-        net =self.activation(batch_norm)
-        print(net.shape)
-        net = tf.layers.average_pooling2d(net,pool_size=10,strides=1,name="pool_end")
-        #
-        pool_shape = tf.shape(net)
-        net = tf.reshape(net,shape=(pool_shape[0],pool_shape[3])) 
-        #tf.reshape(net, [-1, self.num_classes], name='pool7_reshape')
+        net = tf.layers.conv2d(self.images, 32, [3, 3], strides=[1,1], padding='SAME',name='conv1')
+        net = tf.contrib.layers.batch_norm(net,decay=0.99,scale=True,center=True,updates_collections=None,is_training=is_training,data_format=four_letter_data_format)
+        net =self.activation(net)
+        net = tf.layers.max_pooling2d(net,  2, 2,name="pool1")
+        #112
+        net = tf.layers.conv2d(net, 64, [3, 3], name='conv2',padding='SAME')
+        net = tf.contrib.layers.batch_norm(net,decay=0.99,scale=True,center=True,updates_collections=None,is_training=is_training,data_format=four_letter_data_format)
+        net =self.activation(net)
+        net = tf.layers.conv2d(net, 64, [3, 3], name='conv21',padding='SAME')
+        net = tf.contrib.layers.batch_norm(net,decay=0.99,scale=True,center=True,updates_collections=None,is_training=is_training,data_format=four_letter_data_format)
+        net =self.activation(net)
+        net = tf.layers.max_pooling2d(net,  2, 2,name="pool2")
+        #64
+        net = tf.layers.conv2d(net, 128, [3, 3], name='conv3',padding='SAME')
+        net = tf.contrib.layers.batch_norm(net,decay=0.99,scale=True,center=True,updates_collections=None,is_training=is_training,data_format=four_letter_data_format)
+        net =self.activation(net)
+        net = tf.layers.conv2d(net, 128, [3, 3], name='conv31',padding='SAME')
+        net = tf.contrib.layers.batch_norm(net,decay=0.99,scale=True,center=True,updates_collections=None,is_training=is_training,data_format=four_letter_data_format)
+        net =self.activation(net)
+        net = tf.layers.max_pooling2d(net,  2, 2,name="pool3",padding='SAME')
+        #32
+        net = tf.layers.conv2d(net, 256, [3, 3], name='conv4',padding='SAME')
+        net = tf.contrib.layers.batch_norm(net,decay=0.99,scale=True,center=True,updates_collections=None,is_training=is_training,data_format=four_letter_data_format)
+        net =self.activation(net)
+        net = tf.layers.conv2d(net, 256, [3, 3], name='conv41',padding='SAME')
+        net = tf.contrib.layers.batch_norm(net,decay=0.99,scale=True,center=True,updates_collections=None,is_training=is_training,data_format=four_letter_data_format)
+        net =self.activation(net)
+        net = tf.layers.max_pooling2d(net,  2, 2,name="pool4")
+        #16
+        net = tf.layers.conv2d(net, 256, [3, 3], name='conv5',padding='SAME')
+        net = tf.contrib.layers.batch_norm(net,decay=0.99,scale=True,center=True,updates_collections=None,is_training=is_training,data_format=four_letter_data_format)
+        net =self.activation(net)
+        net = tf.layers.conv2d(net, 256, [3, 3], name='conv51',padding='SAME')
+        net = tf.contrib.layers.batch_norm(net,decay=0.99,scale=True,center=True,updates_collections=None,is_training=is_training,data_format=four_letter_data_format)
+        net =self.activation(net)
+        net = tf.layers.max_pooling2d(net,  2, 2,name="pool5")
+        #8
+        net = tf.layers.conv2d(net, 512, [3, 3],name='fc6')
+        net = tf.contrib.layers.batch_norm(net,decay=0.99,scale=True,center=True,updates_collections=None,is_training=is_training,data_format=four_letter_data_format)
+        net =self.activation(net)
+        #6
+        net = tf.layers.dropout(net, keep_prob,name='dropout6')
+        net = tf.layers.conv2d(net, 512, [3, 3], name='fc7')
+        net = tf.contrib.layers.batch_norm(net,decay=0.99,scale=True,center=True,updates_collections=None,is_training=is_training,data_format=four_letter_data_format)
+        net =self.activation(net)
+        #4
+        net = tf.layers.dropout(net, keep_prob, name='dropout7')
+        net = tf.layers.conv2d(net, 512, [3, 3], name='fc711')
+        net = tf.contrib.layers.batch_norm(net,decay=0.99,scale=True,center=True,updates_collections=None,is_training=is_training,data_format=four_letter_data_format)
+        net =self.activation(net)
+        #2
+        net = tf.layers.conv2d(net, self.num_classes, [1, 1],name='fc8')
+        net = tf.contrib.layers.batch_norm(net,decay=0.99,scale=True,center=True,updates_collections=None,is_training=is_training,data_format=four_letter_data_format)
+        net =self.activation(net)
+        #1
+        net = tf.reshape(net, [-1, self.num_classes], name='pool7_reshape')
         return net
 
 
