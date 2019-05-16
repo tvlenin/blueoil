@@ -61,8 +61,6 @@ void QuantizedConv2D(QUANTIZED_NOT_PACKED input[], QUANTIZED_PACKED_KERNEL kerne
     p.device_output_buf = new BIN_CONV_OUTPUT[size]();
   else
     std::memset((void *)p.device_output_buf, 0, size * sizeof(BIN_CONV_OUTPUT));
-  printf("kh: %d kw: %d padding: %d",kh,kw,padding);
-  printf("ic: %d tiling: %d ",ic ,TilingInTypeBitWidth);
   if ((kh == 3 && kw == 3 && padding == 1) ||
       (kh == 1 && kw == 1 && padding == 0)) {
     if ((ic % TilingInTypeBitWidth) == 0) {
