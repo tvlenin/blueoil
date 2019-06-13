@@ -18,6 +18,9 @@ limitations under the License.
 
 #include "global.h"
 
+
+void func_Add(uint8_t *&input, float *&term, float *&output, int out_height, int out_width, int out_depth);
+
 void func_Add(T_FLOAT input[], T_FLOAT term, T_FLOAT output[], T_UINT out_height, T_UINT out_width, T_UINT out_depth);
 
 void func_Add(T_FLOAT input[], T_FLOAT term[], T_FLOAT output[], T_UINT out_height, T_UINT out_width, T_UINT out_depth);

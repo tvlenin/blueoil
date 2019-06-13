@@ -33,7 +33,7 @@ def darknet(name, inputs, filters, kernel_size, is_training=tf.constant(False), 
     else:
         raise ValueError("data format must be 'NCHW' or 'NHWC'. got {}.".format(data_format))
 
-    with tf.variable_scope(name):
+    with tf.variable_scope(name,):
         if activation is None:
             def activation(x): return tf.nn.leaky_relu(x, alpha=0.1, name="leaky_relu")
 
@@ -64,7 +64,7 @@ def lmnet_block(
         is_training=tf.constant(True),
         activation=None,
         use_bias=True,
-        use_batch_norm=True,
+        use_batch_norm=False,
         is_debug=False,
         data_format='channels_last',
 ):
@@ -87,10 +87,10 @@ def lmnet_block(
     Returns:
         tf.Tensor: Output of current layer block.
     """
-    with tf.variable_scope(name, custom_getter=custom_getter):
+    with tf.variable_scope(name, custom_getter=custom_getter,reuse=tf.AUTO_REUSE):
         w_init = tf.truncated_normal_initializer(mean=0.0,stddev=(1.0/int(inputs.shape[2])))
         conv = tf.layers.conv2d(inputs, filters=filters, kernel_size=kernel_size, padding='SAME', use_bias=False,
-                                data_format=data_format,kernel_initializer=w_init)
+                                data_format=data_format,kernel_initializer=w_init,reuse=tf.AUTO_REUSE, name=name)
 
         if use_batch_norm:
             # TODO(wenhao) hw supports `tf.contrib.layers.batch_norm` currently. change it when supported.

@@ -63,6 +63,7 @@ def top_order(output_node, exec_list, visited):
     visited : [str]
         List of already visited nodes.
     """
+
     if visited[output_node.name]:
         return
     for input_node in output_node.input_nodes:

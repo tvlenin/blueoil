@@ -58,6 +58,16 @@ class LmnetV1(Base):
         if self.data_format != 'NHWC':
             output = tf.transpose(output, perm=['NHWC'.find(d) for d in self.data_format])
         return output
+    def RNN(self,is_training,inputs,depth,filters,reuse=tf.AUTO_REUSE,scope=None):
+        channels_data_format = 'channels_last' if self.data_format == 'NHWC' else 'channels_first'
+        _lmnet_block = self._get_lmnet_block(is_training, channels_data_format)
+        with tf.variable_scope(scope, 'rnn'):
+            x = inputs
+            for i in range(0, depth):
+                with tf.variable_scope('block{}'.format(i)):
+                    x = _lmnet_block('conv1R', x, filters, 3)
+                    x = tf.add(inputs, x,name='add1')
+        return x
 
     def base(self, images, is_training, *args, **kwargs):
         """Base network.
@@ -73,43 +83,69 @@ class LmnetV1(Base):
         _lmnet_block = self._get_lmnet_block(is_training, channels_data_format)
 
         self.images = images
-        #224
-        x = _lmnet_block('conv1', images, 32, 3)
-        x = _lmnet_block('conv2', x, 64, 3)
-        x = self._space_to_depth(name='pool2', inputs=x)
-        #112
-        x = _lmnet_block('conv3', x, 128, 3)
-        x = _lmnet_block('conv4', x, 64, 3)
-        x = self._space_to_depth(name='pool4', inputs=x)
-        #56
-        x = _lmnet_block('conv5', x, 128, 3)
-        x = self._space_to_depth(name='pool5', inputs=x)
-        #28
-        x = _lmnet_block('conv6', x, 64, 1, activation=tf.nn.relu)
-        x = tf.layers.dropout(x, training=is_training)
+        
 
-        kernel_initializer = tf.random_normal_initializer(mean=0.0, stddev=0.01)
-        x = tf.layers.conv2d(name='conv7',
-                             inputs=x,
-                             filters=self.num_classes,
-                             kernel_size=1,
-                             kernel_initializer=kernel_initializer,
-                             activation=None,
-                             use_bias=True,
-                             data_format=channels_data_format)
+        #t=0
+        x1f = _lmnet_block('conv1', images, 32, 3)
+        x2f = _lmnet_block('conv2', x1f, 64, 3)
+        p2f = self._space_to_depth(name='pool2', inputs=x2f)
+        #x3f = _lmnet_block('conv3', p2f, 128, 3)
+        #x4f = _lmnet_block('conv4', x3f, 64, 3)
+        p4f = self._space_to_depth(name='pool4', inputs=p2f)
+        #x5f = _lmnet_block('conv5', p4f, 128, 3)
+        p5f = self._space_to_depth(name='pool5', inputs=p4f)
+        #x6f = _lmnet_block('conv6', p5f, 64, 3)
+        #x6f = tf.layers.dropout(x6f, training=is_training)
+        #x7f = _lmnet_block('conv7', p5f, 10, 3)
 
-        self._heatmap_layer = x
+       
+        #t=1
+        x1r = _lmnet_block('conv1', images, 32, 3) + _lmnet_block('conv1r', x1f, 32, 3)
+        x2r = _lmnet_block('conv2r', x2f, 64, 3)
+        p2r = self._space_to_depth(name='pool2', inputs=x2r)
+        #x3r = _lmnet_block('conv3', p2r, 128, 3) + _lmnet_block('conv3r', x3f, 128, 3)
+        #x4r = _lmnet_block('conv4', x3r, 64, 3) + _lmnet_block('conv4r', x4f, 64, 3)
+        p4r = self._space_to_depth(name='pool4', inputs=p2r)
+        #x5r = _lmnet_block('conv5', p4r, 128, 3) + _lmnet_block('conv5r', x5f, 128, 3)
+        p5r = self._space_to_depth(name='pool5', inputs=p4r)
+        #x6r = _lmnet_block('conv6', p5r, 64, 3) + _lmnet_block('conv6r', x6f, 64, 3)
+        x7r = _lmnet_block('conv7', p5r, 10, 3) + _lmnet_block('conv7r', p5f, 10, 3)
+        '''
+        #t=2
+        x1r = _lmnet_block('conv11', images, 32, 3) + _lmnet_block('conv1r', x1r, 32, 3)
+        x2r = _lmnet_block('conv22', x1r, 64, 3) + _lmnet_block('conv2r', x2r, 64, 3)
+        p2r = self._space_to_depth(name='pool2', inputs=x2r)
+        x3r = _lmnet_block('conv22', p2r, 128, 3) + _lmnet_block('conv3r', x3r, 128, 3)
+        x4r = _lmnet_block('conv4', x3r, 64, 3) + _lmnet_block('conv4r', x4r, 64, 3)
+        p4r = self._space_to_depth(name='pool4', inputs=x4r)
+        x5r = _lmnet_block('conv5', p4r, 128, 3) + _lmnet_block('conv5r', x5r, 128, 3)
+        p5r = self._space_to_depth(name='pool5', inputs=x5r)
+        x6r = _lmnet_block('conv6', p5r, 64, 3) + _lmnet_block('conv6r', x6r, 64, 3)
+        x7r = _lmnet_block('conv7', x6r, 10, 3) + _lmnet_block('conv7r', x7r, 10, 3)
 
-        h = x.get_shape()[1].value if self.data_format == 'NHWC' else x.get_shape()[2].value
-        w = x.get_shape()[2].value if self.data_format == 'NHWC' else x.get_shape()[3].value
+        #t=3
+        x1r = _lmnet_block('conv11', images, 32, 3) + _lmnet_block('conv1r', x1r, 32, 3)
+        x2r = _lmnet_block('conv22', x1r, 64, 3) + _lmnet_block('conv2r', x2r, 64, 3)
+        p2r = self._space_to_depth(name='pool2', inputs=x2r)
+        x3r = _lmnet_block('conv22', p2r, 128, 3) + _lmnet_block('conv3r', x3r, 128, 3)
+        x4r = _lmnet_block('conv4', x3r, 64, 3) + _lmnet_block('conv4r', x4r, 64, 3)
+        p4r = self._space_to_depth(name='pool4', inputs=x4r)
+        x5r = _lmnet_block('conv5', p4r, 128, 3) + _lmnet_block('conv5r', x5r, 128, 3)
+        p5r = self._space_to_depth(name='pool5', inputs=x5r)
+        x6r = _lmnet_block('conv6', p5r, 64, 3) + _lmnet_block('conv6r', x6r, 64, 3)
+        x7r = _lmnet_block('conv7', x6r, 10, 3) + _lmnet_block('conv7r', x7r, 10, 3)
+        '''
+        h = x7r.get_shape()[1].value if self.data_format == 'NHWC' else x7r.get_shape()[2].value
+        w = x7r.get_shape()[2].value if self.data_format == 'NHWC' else x7r.get_shape()[3].value
         x = tf.layers.average_pooling2d(name='pool7',
-                                        inputs=x,
+                                        inputs=x7r,
                                         pool_size=[h, w],
                                         padding='VALID',
                                         strides=1,
                                         data_format=channels_data_format)
 
         self.base_output = tf.reshape(x, [-1, self.num_classes], name='pool7_reshape')
+
 
         return self.base_output
 
